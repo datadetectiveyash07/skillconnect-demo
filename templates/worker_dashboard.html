@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worker Dashboard - RozgarMitra</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+  }
+
+  body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #020617 100%);
+    color: #e2e8f0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Animated background elements */
+  .bg-element {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.08;
+    animation: float 30s infinite ease-in-out;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .bg-element-1 {
+    width: 500px;
+    height: 500px;
+    background: #3b82f6;
+    top: -150px;
+    left: -150px;
+    animation-delay: 0s;
+  }
+
+  .bg-element-2 {
+    width: 400px;
+    height: 400px;
+    background: #10b981;
+    bottom: -120px;
+    right: -120px;
+    animation-delay: 5s;
+  }
+
+  .bg-element-3 {
+    width: 350px;
+    height: 350px;
+    background: #f59e0b;
+    top: 40%;
+    right: 5%;
+    animation-delay: 10s;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px);
+    }
+    50% {
+      transform: translateY(50px) translateX(30px);
+    }
+  }
+
+  .main-wrapper {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  /* Header Section */
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 50px;
+    animation: slideInDown 0.7s ease-out;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .header-title h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+  }
+
+  .header-title p {
+    color: #cbd5e1;
+    margin: 5px 0 0 0;
+    font-size: 0.95rem;
+  }
+
+  .logout-btn {
+    padding: 12px 28px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    cursor: pointer;
+  }
+
+  .logout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5);
+    color: white;
+  }
+
+  .logout-btn:active {
+    transform: translateY(-1px);
+  }
+
+  /* Profile Card */
+  .profile-card {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 25px;
+    padding: 35px 40px;
+    margin-bottom: 40px;
+    animation: scaleIn 0.7s ease-out 0.1s both;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Gradient border on top */
+  .profile-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    border-radius: 25px 25px 0 0;
+  }
+
+  .profile-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .profile-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .profile-item-label {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .profile-item-value {
+    color: #e2e8f0;
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+
+  .profile-item-value.highlight {
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .rating-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rating-stars {
+    font-size: 1.2rem;
+    color: #fbbf24;
+  }
+
+  /* Jobs Section */
+  .jobs-section {
+    animation: fadeIn 0.7s ease-out 0.2s both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+
+  .section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin: 0;
+    color: #f1f5f9;
+  }
+
+  .section-header::before {
+    content: '';
+    width: 5px;
+    height: 32px;
+    background: linear-gradient(180deg, #3b82f6, #60a5fa);
+    border-radius: 3px;
+  }
+
+  .jobs-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
+  }
+
+  .job-card {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+    animation: slideInUp 0.6s ease-out;
+    animation-fill-mode: both;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .job-card:nth-child(1) { animation-delay: 0.3s; }
+  .job-card:nth-child(2) { animation-delay: 0.4s; }
+  .job-card:nth-child(3) { animation-delay: 0.5s; }
+  .job-card:nth-child(n+4) { animation-delay: 0.6s; }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Shine effect */
+  .job-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.6s ease;
+  }
+
+  .job-card:hover::before {
+    opacity: 1;
+    top: -30%;
+    right: -30%;
+  }
+
+  /* Top border gradient */
+  .job-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #10b981);
+    border-radius: 20px 20px 0 0;
+  }
+
+  .job-card:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    transform: translateY(-12px);
+    box-shadow: 0 25px 60px rgba(59, 130, 246, 0.25);
+  }
+
+  .job-title {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #60a5fa;
+    margin: 0 0 20px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .job-details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .job-detail {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+  }
+
+  .job-detail-icon {
+    font-size: 1.2rem;
+    min-width: 20px;
+    color: #3b82f6;
+    margin-top: 2px;
+  }
+
+  .job-detail-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .job-detail-label {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .job-detail-value {
+    color: #e2e8f0;
+    font-weight: 600;
+  }
+
+  .salary-highlight {
+    color: #34d399;
+    font-weight: 900;
+    font-size: 1.1rem;
+  }
+
+  .apply-btn {
+    width: 100%;
+    padding: 13px 24px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .apply-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .apply-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
+    color: white;
+  }
+
+  .apply-btn:hover::before {
+    width: 350px;
+    height: 350px;
+  }
+
+  .apply-btn:active {
+    transform: translateY(-1px);
+  }
+
+  /* No Jobs Message */
+  .no-jobs {
+    text-align: center;
+    padding: 60px 40px;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 20px;
+    animation: slideInUp 0.6s ease-out 0.3s both;
+  }
+
+  .no-jobs-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+  }
+
+  .no-jobs-text {
+    font-size: 1.2rem;
+    color: #cbd5e1;
+  }
+
+  @media (max-width: 900px) {
+    .header-section {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .header-title h1 {
+      font-size: 2rem;
+    }
+
+    .jobs-container {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-content {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .main-wrapper {
+      padding: 20px 15px;
+    }
+
+    .header-title h1 {
+      font-size: 1.6rem;
+    }
+
+    .header-title p {
+      font-size: 0.85rem;
+    }
+
+    .logout-btn {
+      padding: 10px 20px;
+      font-size: 0.8rem;
+    }
+
+    .profile-card {
+      padding: 25px 20px;
+    }
+
+    .section-header h2 {
+      font-size: 1.4rem;
+    }
+
+    .job-card {
+      padding: 25px 20px;
+    }
+
+    .job-title {
+      font-size: 1.2rem;
+    }
+
+    .job-detail {
+      font-size: 0.9rem;
+    }
+
+    .apply-btn {
+      padding: 11px 20px;
+      font-size: 0.85rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="bg-element bg-element-1"></div>
+  <div class="bg-element bg-element-2"></div>
+  <div class="bg-element bg-element-3"></div>
+
+  <div class="main-wrapper">
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-title">
+        <h1>Welcome, {{worker.name}} 👋</h1>
+        <p>Your personalized job matches are ready</p>
+      </div>
+      <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="profile-content">
+        <div class="profile-item">
+          <span class="profile-item-label">📊 Your Skills</span>
+          <span class="profile-item-value highlight">{{worker.skills}}</span>
+        </div>
+        <div class="profile-item">
+          <span class="profile-item-label">⭐ Your Rating</span>
+          <div class="rating-display">
+            <span class="profile-item-value">{{worker.rating}}</span>
+            <span class="rating-stars">★</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jobs Section -->
+    <div class="jobs-section">
+      <div class="section-header">
+        <h2>Matching Jobs</h2>
+      </div>
+
+      {% if jobs %}
+      <div class="jobs-container">
+        {% for job in jobs %}
+        <div class="job-card">
+          <h3 class="job-title">{{job.title}}</h3>
+          
+          <div class="job-details">
+            <div class="job-detail">
+              <span class="job-detail-icon">💼</span>
+              <div class="job-detail-text">
+                <span class="job-detail-label">Required Skill</span>
+                <span class="job-detail-value">{{job.skill_required}}</span>
+              </div>
+            </div>
+
+            <div class="job-detail">
+              <span class="job-detail-icon">📍</span>
+              <div class="job-detail-text">
+                <span class="job-detail-label">Location</span>
+                <span class="job-detail-value">{{job.location}}</span>
+              </div>
+            </div>
+
+            <div class="job-detail">
+              <span class="job-detail-icon">💰</span>
+              <div class="job-detail-text">
+                <span class="job-detail-label">Salary</span>
+                <span class="job-detail-value salary-highlight">₹{{job.salary}}</span>
+              </div>
+            </div>
+          </div>
+
+          <a href="/apply_job/{{job.id}}" class="apply-btn">Apply Now →</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="no-jobs">
+        <div class="no-jobs-icon">🔍</div>
+        <p class="no-jobs-text">No matching jobs available right now. Check back soon!</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cf4fd8a84b88826',t:'MTc3MTMyODIyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
